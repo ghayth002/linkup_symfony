@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rencontre index{% endblock %}
+
+{% block body %}
+    <h1>Rencontre index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id_rencontre</th>
+                <th>Id_utilisateur</th>
+                <th>Titre</th>
+                <th>Description</th>
+                <th>Categorie_rencontre</th>
+                <th>Lieu</th>
+                <th>Date_rencontre</th>
+                <th>Image</th>
+                <th>Image_name</th>
+                <th>Tags</th>
+                <th>Places_dispo</th>
+                <th>Budget</th>
+                <th>Bio</th>
+                <th>Statut</th>
+                <th>Age_min</th>
+                <th>Age_max</th>
+                <th>Distance_max</th>
+                <th>Genre_recherche</th>
+                <th>Niveau_relation</th>
+                <th>Created_at</th>
+                <th>Latitude</th>
+                <th>Longitude</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for rencontre in rencontres %}
+            <tr>
+                <td>{{ rencontre.idRencontre }}</td>
+                <td>{{ rencontre.idUtilisateur }}</td>
+                <td>{{ rencontre.titre }}</td>
+                <td>{{ rencontre.description }}</td>
+                <td>{{ rencontre.categorieRencontre }}</td>
+                <td>{{ rencontre.lieu }}</td>
+                <td>{{ rencontre.dateRencontre ? rencontre.dateRencontre|date('Y-m-d') : '' }}</td>
+                <td>{{ rencontre.image }}</td>
+                <td>{{ rencontre.imageName }}</td>
+                <td>{{ rencontre.tags }}</td>
+                <td>{{ rencontre.placesDispo }}</td>
+                <td>{{ rencontre.budget }}</td>
+                <td>{{ rencontre.bio }}</td>
+                <td>{{ rencontre.statut }}</td>
+                <td>{{ rencontre.ageMin }}</td>
+                <td>{{ rencontre.ageMax }}</td>
+                <td>{{ rencontre.distanceMax }}</td>
+                <td>{{ rencontre.genreRecherche }}</td>
+                <td>{{ rencontre.niveauRelation }}</td>
+                <td>{{ rencontre.createdAt ? rencontre.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ rencontre.latitude }}</td>
+                <td>{{ rencontre.longitude }}</td>
+                <td>
+                    <a href="{{ path('app_rencontre_show', {'id_rencontre': rencontre.id_rencontre}) }}">show</a>
+                    <a href="{{ path('app_rencontre_edit', {'id_rencontre': rencontre.id_rencontre}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="23">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_rencontre_new') }}">Create new</a>
+{% endblock %}

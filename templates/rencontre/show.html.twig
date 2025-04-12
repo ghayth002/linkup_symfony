@@ -1,0 +1,106 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Rencontre{% endblock %}
+
+{% block body %}
+    <h1>Rencontre</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id_rencontre</th>
+                <td>{{ rencontre.idRencontre }}</td>
+            </tr>
+            <tr>
+                <th>Id_utilisateur</th>
+                <td>{{ rencontre.idUtilisateur }}</td>
+            </tr>
+            <tr>
+                <th>Titre</th>
+                <td>{{ rencontre.titre }}</td>
+            </tr>
+            <tr>
+                <th>Description</th>
+                <td>{{ rencontre.description }}</td>
+            </tr>
+            <tr>
+                <th>Categorie_rencontre</th>
+                <td>{{ rencontre.categorieRencontre }}</td>
+            </tr>
+            <tr>
+                <th>Lieu</th>
+                <td>{{ rencontre.lieu }}</td>
+            </tr>
+            <tr>
+                <th>Date_rencontre</th>
+                <td>{{ rencontre.dateRencontre ? rencontre.dateRencontre|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Image</th>
+                <td>{{ rencontre.image }}</td>
+            </tr>
+            <tr>
+                <th>Image_name</th>
+                <td>{{ rencontre.imageName }}</td>
+            </tr>
+            <tr>
+                <th>Tags</th>
+                <td>{{ rencontre.tags }}</td>
+            </tr>
+            <tr>
+                <th>Places_dispo</th>
+                <td>{{ rencontre.placesDispo }}</td>
+            </tr>
+            <tr>
+                <th>Budget</th>
+                <td>{{ rencontre.budget }}</td>
+            </tr>
+            <tr>
+                <th>Bio</th>
+                <td>{{ rencontre.bio }}</td>
+            </tr>
+            <tr>
+                <th>Statut</th>
+                <td>{{ rencontre.statut }}</td>
+            </tr>
+            <tr>
+                <th>Age_min</th>
+                <td>{{ rencontre.ageMin }}</td>
+            </tr>
+            <tr>
+                <th>Age_max</th>
+                <td>{{ rencontre.ageMax }}</td>
+            </tr>
+            <tr>
+                <th>Distance_max</th>
+                <td>{{ rencontre.distanceMax }}</td>
+            </tr>
+            <tr>
+                <th>Genre_recherche</th>
+                <td>{{ rencontre.genreRecherche }}</td>
+            </tr>
+            <tr>
+                <th>Niveau_relation</th>
+                <td>{{ rencontre.niveauRelation }}</td>
+            </tr>
+            <tr>
+                <th>Created_at</th>
+                <td>{{ rencontre.createdAt ? rencontre.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Latitude</th>
+                <td>{{ rencontre.latitude }}</td>
+            </tr>
+            <tr>
+                <th>Longitude</th>
+                <td>{{ rencontre.longitude }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_rencontre_index') }}">back to list</a>
+
+    <a href="{{ path('app_rencontre_edit', {'id_rencontre': rencontre.id_rencontre}) }}">edit</a>
+
+    {{ include('rencontre/_delete_form.html.twig') }}
+{% endblock %}
