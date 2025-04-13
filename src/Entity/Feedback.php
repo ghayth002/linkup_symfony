@@ -232,4 +232,25 @@ class Feedback
         return $this;
     }
 
+    /**
+     * Get the associated utilisateur
+     */
+    private ?Utilisateur $utilisateur = null;
+    
+    /**
+     * Get the associated utilisateur
+     */
+    public function getUtilisateur(): ?Utilisateur
+    {
+        return $this->utilisateur;
+    }
+    
+    /**
+     * Set the associated utilisateur
+     */
+    public function setUtilisateur(?Utilisateur $utilisateur): self
+    {
+        $this->utilisateur = $utilisateur;
+        return $this;
+    }
 }
