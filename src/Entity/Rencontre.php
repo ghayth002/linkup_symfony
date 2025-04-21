@@ -99,7 +99,7 @@ class Rencontre
         return $this;
     }
 
-    #[ORM\Column(type: 'date', nullable: false)]
+    #[ORM\Column(type: 'date', nullable: true)]
     private ?\DateTimeInterface $date_rencontre = null;
 
     public function getDate_rencontre(): ?\DateTimeInterface
@@ -107,9 +107,9 @@ class Rencontre
         return $this->date_rencontre;
     }
 
-    public function setDate_rencontre(\DateTimeInterface $date_rencontre): self
+    public function setDate_rencontre(?\DateTimeInterface $date_rencontre = null): self
     {
-        $this->date_rencontre = $date_rencontre;
+        $this->date_rencontre = $date_rencontre ?: new \DateTime();
         return $this;
     }
 

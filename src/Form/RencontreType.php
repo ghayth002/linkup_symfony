@@ -23,7 +23,9 @@ class RencontreType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('id_utilisateur', HiddenType::class)
+            ->add('id_utilisateur', HiddenType::class, [
+                'required' => true
+            ])
             ->add('titre', TextType::class, [
                 'constraints' => [
                     new NotBlank(['message' => 'Veuillez entrer un titre']),
@@ -54,8 +56,12 @@ class RencontreType extends AbstractType
             ])
             ->add('date_rencontre', DateType::class, [
                 'widget' => 'single_text',
+                'html5' => true,
+                'data' => new \DateTime(),
                 'constraints' => [
-                    new NotBlank(['message' => 'Veuillez sélectionner une date']),
+                    new NotBlank([
+                        'message' => 'La date de rencontre ne peut pas être vide'
+                    ]),
                 ],
             ])
             ->add('image', FileType::class, [
@@ -88,7 +94,7 @@ class RencontreType extends AbstractType
                 'attr' => [
                     'min' => 1,
                     'placeholder' => 'Nombre de places disponibles'
-                ]
+                ],
             ])
             ->add('budget', MoneyType::class, [
                 'required' => false,
@@ -113,7 +119,7 @@ class RencontreType extends AbstractType
                 'attr' => [
                     'min' => 18,
                     'max' => 99
-                ]
+                ],
             ])
             ->add('age_max', IntegerType::class, [
                 'constraints' => [
@@ -122,7 +128,7 @@ class RencontreType extends AbstractType
                 'attr' => [
                     'min' => 18,
                     'max' => 99
-                ]
+                ],
             ])
             ->add('distance_max', IntegerType::class, [
                 'constraints' => [
@@ -131,7 +137,7 @@ class RencontreType extends AbstractType
                 'attr' => [
                     'min' => 1,
                     'max' => 1000
-                ]
+                ],
             ])
             ->add('genre_recherche', ChoiceType::class, [
                 'required' => false,
@@ -140,7 +146,7 @@ class RencontreType extends AbstractType
                     'Hommes' => 'Hommes',
                     'Femmes' => 'Femmes',
                     'Non-binaire' => 'Non-binaire'
-                ]
+                ],
             ])
             ->add('niveau_relation', ChoiceType::class, [
                 'required' => false,
@@ -150,13 +156,11 @@ class RencontreType extends AbstractType
                     'Casual' => 'Casual',
                     'Réseautage' => 'Réseautage',
                     'Professionnel' => 'Professionnel'
-                ]
+                ],
             ])
-            ->add('created_at', DateType::class, [
+            ->add('created_at', HiddenType::class, [
                 'required' => false,
-                'widget' => 'single_text',
-                'data' => new \DateTime(),
-                'attr' => ['class' => 'd-none']
+                'mapped' => false,
             ])
             ->add('latitude', HiddenType::class, [
                 'required' => false

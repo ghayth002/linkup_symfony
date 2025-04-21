@@ -25,46 +25,65 @@ final class RencontreController extends AbstractController{
     }
 
     #[Route('/new', name: 'app_rencontre_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger): Response
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $rencontre = new Rencontre();
-        
         // Set default values
         $rencontre->setIdUtilisateur(1); // Default user ID (should be the current user in a real app)
-        $rencontre->setCreatedAt(new \DateTime());
         $rencontre->setStatut('actif');
+        $rencontre->setCreated_at(new \DateTime());
+        $rencontre->setDate_rencontre(new \DateTime()); // Ensure date is set
         
         $form = $this->createForm(RencontreType::class, $rencontre);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Handle image upload
-            $imageFile = $form->get('image')->getData();
-            
-            if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
-                
-                try {
-                    $imageFile->move(
-                        $this->getParameter('rencontres_directory'),
-                        $newFilename
-                    );
+            try {
+                // Handle image upload if present
+                $imageFile = $form->get('image')->getData();
+                if ($imageFile) {
+                    $newFilename = uniqid().'.'.$imageFile->guessExtension();
                     
-                    // Update the 'image_name' property to store the image file name
-                    $rencontre->setImageName($newFilename);
-                } catch (FileException $e) {
-                    // Handle exception if something happens during file upload
-                    $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image');
+                    try {
+                        $imageFile->move(
+                            $this->getParameter('rencontres_directory'),
+                            $newFilename
+                        );
+                        $rencontre->setImage_name($newFilename);
+                    } catch (FileException $e) {
+                        $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image: ' . $e->getMessage());
+                        return $this->redirectToRoute('app_rencontre_new');
+                    }
+                }
+                
+                // Double-check date is set
+                if ($rencontre->getDate_rencontre() === null) {
+                    $rencontre->setDate_rencontre(new \DateTime());
+                }
+                
+                $entityManager->persist($rencontre);
+                $entityManager->flush();
+
+                $this->addFlash('success', 'Votre rencontre a été créée avec succès!');
+                return $this->redirectToRoute('app_rencontre_index', [], Response::HTTP_SEE_OTHER);
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la création de la rencontre: ' . $e->getMessage());
+            }
+        } elseif ($form->isSubmitted()) {
+            // Add flash message for form errors
+            $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez les corriger.');
+            
+            // Check specifically for date_rencontre errors
+            if ($form->get('date_rencontre')->getErrors()->count() > 0) {
+                foreach ($form->get('date_rencontre')->getErrors() as $error) {
+                    $this->addFlash('error', 'Date de rencontre: ' . $error->getMessage());
                 }
             }
             
-            $entityManager->persist($rencontre);
-            $entityManager->flush();
-            
-            $this->addFlash('success', 'La rencontre a été créée avec succès!');
-            return $this->redirectToRoute('app_rencontre_show', ['id_rencontre' => $rencontre->getId_rencontre()], Response::HTTP_SEE_OTHER);
+            // Log form errors for debugging
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('rencontre/new.html.twig', [
@@ -107,48 +126,77 @@ final class RencontreController extends AbstractController{
             $rencontre->setCreatedAt(new \DateTime());
         }
         
+        // Ensure date_rencontre is set
+        if ($rencontre->getDate_rencontre() === null) {
+            $rencontre->setDate_rencontre(new \DateTime());
+        }
+        
         $oldImageName = $rencontre->getImageName();
         $form = $this->createForm(RencontreType::class, $rencontre);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Handle image upload
-            $imageFile = $form->get('image')->getData();
-            
-            if ($imageFile) {
-                $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $slugger->slug($originalFilename);
-                $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
+            try {
+                // Handle image upload
+                $imageFile = $form->get('image')->getData();
                 
-                try {
-                    $imageFile->move(
-                        $this->getParameter('rencontres_directory'),
-                        $newFilename
-                    );
+                if ($imageFile) {
+                    $originalFilename = pathinfo($imageFile->getClientOriginalName(), PATHINFO_FILENAME);
+                    $safeFilename = $slugger->slug($originalFilename);
+                    $newFilename = $safeFilename . '-' . uniqid() . '.' . $imageFile->guessExtension();
                     
-                    // Update the 'image_name' property to store the image file name
-                    $rencontre->setImageName($newFilename);
-                    
-                    // Remove old image if exists
-                    if ($oldImageName) {
-                        $oldImagePath = $this->getParameter('rencontres_directory') . '/' . $oldImageName;
-                        if (file_exists($oldImagePath)) {
-                            unlink($oldImagePath);
+                    try {
+                        $imageFile->move(
+                            $this->getParameter('rencontres_directory'),
+                            $newFilename
+                        );
+                        
+                        // Update the 'image_name' property to store the image file name
+                        $rencontre->setImageName($newFilename);
+                        
+                        // Remove old image if exists
+                        if ($oldImageName) {
+                            $oldImagePath = $this->getParameter('rencontres_directory') . '/' . $oldImageName;
+                            if (file_exists($oldImagePath)) {
+                                unlink($oldImagePath);
+                            }
                         }
+                    } catch (FileException $e) {
+                        // Handle exception if something happens during file upload
+                        $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image: ' . $e->getMessage());
                     }
-                } catch (FileException $e) {
-                    // Handle exception if something happens during file upload
-                    $this->addFlash('error', 'Une erreur est survenue lors du téléchargement de l\'image');
+                } else {
+                    // If no new image is uploaded, keep the old image name
+                    $rencontre->setImageName($oldImageName);
                 }
-            } else {
-                // If no new image is uploaded, keep the old image name
-                $rencontre->setImageName($oldImageName);
+                
+                // Double-check date is set
+                if ($rencontre->getDate_rencontre() === null) {
+                    $rencontre->setDate_rencontre(new \DateTime());
+                }
+                
+                $entityManager->flush();
+                
+                $this->addFlash('success', 'La rencontre a été modifiée avec succès!');
+                return $this->redirectToRoute('app_rencontre_show', ['id_rencontre' => $rencontre->getId_rencontre()], Response::HTTP_SEE_OTHER);
+            } catch (\Exception $e) {
+                $this->addFlash('error', 'Une erreur est survenue lors de la modification de la rencontre: ' . $e->getMessage());
+            }
+        } elseif ($form->isSubmitted()) {
+            // Add flash message for form errors
+            $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez les corriger.');
+            
+            // Check specifically for date_rencontre errors
+            if ($form->get('date_rencontre')->getErrors()->count() > 0) {
+                foreach ($form->get('date_rencontre')->getErrors() as $error) {
+                    $this->addFlash('error', 'Date de rencontre: ' . $error->getMessage());
+                }
             }
             
-            $entityManager->flush();
-            
-            $this->addFlash('success', 'La rencontre a été modifiée avec succès!');
-            return $this->redirectToRoute('app_rencontre_show', ['id_rencontre' => $rencontre->getId_rencontre()], Response::HTTP_SEE_OTHER);
+            // Log form errors for debugging
+            foreach ($form->getErrors(true) as $error) {
+                $this->addFlash('error', $error->getMessage());
+            }
         }
 
         return $this->render('rencontre/edit.html.twig', [
